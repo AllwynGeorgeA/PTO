@@ -36,7 +36,7 @@ def generate(
     db: Db,
 ) -> AiReply:
     """Generate a reply for a message in the chosen tone."""
-    return reply_service.create_reply(db, user, body.message, body.tone)
+    return reply_service.create_reply(db, user, body.message, body.tone, body.include_availability)
 
 
 @router.post("/{reply_id}/regenerate", response_model=ReplyOut, status_code=201)

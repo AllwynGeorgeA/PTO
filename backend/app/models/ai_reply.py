@@ -14,7 +14,7 @@ class AiReply(Base, TimestampMixin):
     __tablename__ = "ai_replies"
     __table_args__ = (
         CheckConstraint(
-            "tone IN ('professional','funny','savage_office_safe','corporate_diplomatic')",
+            "tone IN ('professional','funny','savage_office_safe','corporate_diplomatic','tanglish_manager')",  # noqa: E501
             name="ck_ai_replies_tone",
         ),
         CheckConstraint("source IN ('openai','template')", name="ck_ai_replies_source"),

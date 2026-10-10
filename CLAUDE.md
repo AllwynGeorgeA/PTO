@@ -91,7 +91,7 @@ interface PtoPlan { id: number; employeeName: string; startDate: string; endDate
 - Tones: `professional`, `funny`, `savage_office_safe`, `corporate_diplomatic`
 - Replies must stay office-safe (no insults, profanity, HR-risky content)
 - No `OPENAI_API_KEY` or an API error → use template fallback, set `source = "template"`
-- Free plan: 5 AI replies per calendar month; over limit → HTTP 402
+- Free plan: 20 AI replies per calendar month; over limit → HTTP 402
 
 ### Handover Tasks
 - `priority`: low | medium | high; `status`: pending | completed

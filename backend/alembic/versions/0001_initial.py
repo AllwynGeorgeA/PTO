@@ -85,7 +85,7 @@ def upgrade() -> None:
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
         _created_at(),
         sa.CheckConstraint(
-            "tone IN ('professional','funny','savage_office_safe','corporate_diplomatic')",
+            "tone IN ('professional','funny','savage_office_safe','corporate_diplomatic','tanglish_manager')",  # noqa: E501
             name="ck_ai_replies_tone",
         ),
         sa.CheckConstraint("source IN ('openai','template')", name="ck_ai_replies_source"),

@@ -33,7 +33,7 @@ PLANS: list[dict[str, object]] = [
         "id": "free",
         "name": "Free",
         "price": 0,
-        "features": ["5 AI replies per month", "PTO planner", "Handover assistant"],
+        "features": ["20 AI replies per month", "PTO planner", "Handover assistant"],
     },
     {
         "id": "pro",

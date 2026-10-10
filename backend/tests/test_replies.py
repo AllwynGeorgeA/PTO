@@ -11,9 +11,10 @@ from app.main import API_PREFIX, app
 from app.models import AiReply, User
 from app.routers.replies import router
 from app.services import ai_service
+from app.services.reply_service import FREE_MONTHLY_LIMIT as LIMIT
 
 BASE = f"{API_PREFIX}/replies"
-TONES = ["professional", "funny", "savage_office_safe", "corporate_diplomatic"]
+TONES = ["professional", "funny", "savage_office_safe", "corporate_diplomatic", "tanglish_manager"]
 
 
 @pytest.fixture(autouse=True)
@@ -77,20 +78,20 @@ def test_openai_failure_falls_back_to_template(
 def test_free_limit_boundary(
     client: TestClient, auth_headers: dict, openai_on: None, db: Session, user: User
 ) -> None:
-    _seed(db, user, 4)
-    assert _gen(client, auth_headers).status_code == 201  # type: ignore[attr-defined]  # 5th
+    _seed(db, user, LIMIT - 1)
+    assert _gen(client, auth_headers).status_code == 201  # type: ignore[attr-defined]  # last free
     r = _gen(client, auth_headers)
     assert r.status_code == 402  # type: ignore[attr-defined]
     assert "Upgrade" in r.json()["detail"]  # type: ignore[attr-defined]
     usage = client.get(f"{BASE}/usage", headers=auth_headers).json()
-    assert usage == {"used": 5, "limit": 5, "plan": "free"}
+    assert usage == {"used": LIMIT, "limit": LIMIT, "plan": "free"}
 
 
 def test_regenerate_counts_and_is_blocked_over_limit(
     client: TestClient, auth_headers: dict, openai_on: None, db: Session, user: User
 ) -> None:
     first = _gen(client, auth_headers).json()  # type: ignore[attr-defined]
-    _seed(db, user, 3)
+    _seed(db, user, LIMIT - 2)
     r = client.post(f"{BASE}/{first['id']}/regenerate", headers=auth_headers)
     assert r.status_code == 201
     assert r.json()["id"] != first["id"]
@@ -174,7 +175,7 @@ def test_requires_auth(client: TestClient) -> None:
 def test_usage_default(client: TestClient, auth_headers: dict) -> None:
     assert client.get(f"{BASE}/usage", headers=auth_headers).json() == {
         "used": 0,
-        "limit": 5,
+        "limit": LIMIT,
         "plan": "free",
     }
 
@@ -182,12 +183,47 @@ def test_usage_default(client: TestClient, auth_headers: dict) -> None:
 def test_delete_does_not_reset_free_limit(
     client: TestClient, auth_headers: dict, openai_on: None
 ) -> None:
-    ids = [_gen(client, auth_headers).json()["id"] for _ in range(5)]  # type: ignore[attr-defined]
+    ids = [_gen(client, auth_headers).json()["id"] for _ in range(LIMIT)]  # type: ignore[attr-defined]
     for rid in ids:
         assert client.delete(f"{BASE}/{rid}", headers=auth_headers).status_code == 204
     assert client.get(BASE, headers=auth_headers).json() == []
     put = client.put(f"{BASE}/{ids[0]}", json={"is_saved": True}, headers=auth_headers)
     assert put.status_code == 404
     assert client.delete(f"{BASE}/{ids[0]}", headers=auth_headers).status_code == 404
-    assert client.get(f"{BASE}/usage", headers=auth_headers).json()["used"] == 5
+    assert client.get(f"{BASE}/usage", headers=auth_headers).json()["used"] == LIMIT
     assert _gen(client, auth_headers).status_code == 402  # type: ignore[attr-defined]
+
+
+def test_include_availability_adds_backup_and_return_date(client, auth_headers):
+    from datetime import date, timedelta
+
+    start, end = date.today() + timedelta(days=2), date.today() + timedelta(days=9)
+    client.post(
+        "/api/v1/pto-plans",
+        headers=auth_headers,
+        json={
+            "employee_name": "Alice",
+            "start_date": start.isoformat(),
+            "end_date": end.isoformat(),
+            "backup_person": "Sam Lee",
+            "contact_email": "sam@example.com",
+        },
+    )
+    r = client.post(
+        "/api/v1/replies/generate",
+        headers=auth_headers,
+        json={"message": "Need this today", "tone": "funny", "include_availability": True},
+    )
+    assert r.status_code == 201
+    text = r.json()["generated_reply"]
+    assert "Sam Lee" in text and "sam@example.com" in text
+    assert f"{end + timedelta(days=1):%d %b}" in text
+
+
+def test_availability_ignored_without_plan(client, auth_headers):
+    r = client.post(
+        "/api/v1/replies/generate",
+        headers=auth_headers,
+        json={"message": "Hi", "tone": "funny", "include_availability": True},
+    )
+    assert r.status_code == 201 and "available again" not in r.json()["generated_reply"]

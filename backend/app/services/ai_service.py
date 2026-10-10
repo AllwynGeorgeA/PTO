@@ -7,16 +7,17 @@ from app.config import settings
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_MODEL = "gpt-4o-mini"
+DEFAULT_MODEL = "gpt-4.1-nano"  # cheapest chat model; override with OPENAI_MODEL
 TIMEOUT_SECONDS = 15.0
 
-TONES = ("professional", "funny", "savage_office_safe", "corporate_diplomatic")
+TONES = ("professional", "funny", "savage_office_safe", "corporate_diplomatic", "tanglish_manager")
 
 TONE_STYLES = {
     "professional": "Polite, clear and concise. Warm but businesslike.",
     "funny": "Light-hearted and witty with a touch of self-aware humour. At most one emoji.",
     "savage_office_safe": "Sharp, dry, confident, with playful sass. Never mean, never personal.",
     "corporate_diplomatic": "Smooth corporate-speak that is courteous, non-committal and tactful.",
+    "tanglish_manager": "Reply to the employee's MANAGER in Tanglish (Tamil written in English letters mixed with English, e.g. 'Sir, naan leave-la irukken, backup-kitta solliduren'). Funny and playful but very respectful, never rude. Light humour, at most one emoji.",  # noqa: E501
 }
 
 SYSTEM_PROMPT = (
@@ -62,6 +63,12 @@ TEMPLATES: dict[str, list[str]] = {
         "Thanks for reaching out. I'll take this offline and revisit it when I'm back; my "
         "backup can support in the meantime.",
     ],
+    "tanglish_manager": [
+        "Sir, naan ippo leave-la irukken, laptop kooda vacation mode-la thaan. Urgent-na en backup-kitta sollunga, naan vandhu paakkuren 😄",  # noqa: E501
+        "Sir, meeting-ku varanum-nu aasai thaan, aana leave approve pannadhu neenga thaan! Backup-ku invite anuppunga, avanga paathukuvanga.",  # noqa: E501
+        "Sir, en inbox ippo 'Out of Office' board maadhiri thaan irukku. Naan thirumbi vandha udane pesalam, backup-kitta kekalam 🙏",  # noqa: E501
+        "Sir, vacation-la phone vechu work pannina enakku beach-la sunburn aagidum. Backup irukkaaru, avar-kitta konjam help pannunga please.",  # noqa: E501
+    ],
 }
 
 
@@ -97,11 +104,21 @@ def template_reply(message: str, tone: str) -> str:
     return options[idx]
 
 
-def generate_reply(message: str, tone: str) -> tuple[str, str]:
-    """Return (reply_text, source) where source is 'openai' or 'template'."""
+def generate_reply(message: str, tone: str, availability: str | None = None) -> tuple[str, str]:
+    """Return (reply_text, source) where source is 'openai' or 'template'.
+
+    availability is a trusted line built from the user's PTO plan (who to contact next and when
+    they are back); the reply must mention it.
+    """
     system = f"{SYSTEM_PROMPT}\nTone: {tone}. Style: {TONE_STYLES[tone]}"
+    if availability:
+        system += (
+            f"\nThe reply MUST also tell the sender this, in your own words: {availability} "
+            "(stating who to contact and the return date is allowed)."
+        )
     prompt = f"Write a reply to this message.\n<message>\n{message}\n</message>"
     text = complete(system, prompt)
     if text:
         return text, "openai"
-    return template_reply(message, tone), "template"
+    fallback = template_reply(message, tone)
+    return (f"{fallback} {availability}" if availability else fallback), "template"

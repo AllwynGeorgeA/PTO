@@ -1,6 +1,6 @@
 """Reply business logic: plan limits and persistence."""
 
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -8,9 +8,9 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.exceptions import NotFoundError, PlanLimitError
 from app.models import AiReply, User
-from app.services import ai_service
+from app.services import ai_service, pto_service
 
-FREE_MONTHLY_LIMIT = 5
+FREE_MONTHLY_LIMIT = 20
 
 
 def _month_start() -> datetime:
@@ -31,7 +31,27 @@ def usage(db: Session, user: User) -> tuple[int, int | None]:
     return used or 0, (FREE_MONTHLY_LIMIT if user.plan == "free" else None)
 
 
-def create_reply(db: Session, user: User, message: str, tone: str) -> AiReply:
+def availability_note(db: Session, user: User, today: date | None = None) -> str | None:
+    """Line saying who to contact next and when the user is available, or None without a plan."""
+    today = today or date.today()
+    plan = pto_service.get_next_plan(db, user.id, today)
+    if plan is None:
+        return None
+    back = plan.end_date + timedelta(days=1)
+    when = (
+        f"I'm on leave until {plan.end_date:%d %b}"
+        if plan.start_date <= today
+        else f"I'll be on leave {plan.start_date:%d %b} to {plan.end_date:%d %b}"
+    )
+    return (
+        f"{when}. Please contact {plan.backup_person} ({plan.contact_email}) next; "
+        f"I'm available again from {back:%d %b}."
+    )
+
+
+def create_reply(
+    db: Session, user: User, message: str, tone: str, include_availability: bool = False
+) -> AiReply:
     """Generate and store a reply; enforce the free limit only if OpenAI would be used."""
     if settings.openai_enabled and user.plan == "free":
         # Serialize this user's check-then-insert until commit (no-op on SQLite).
@@ -44,7 +64,8 @@ def create_reply(db: Session, user: User, message: str, tone: str) -> AiReply:
                 f"Free plan limit of {limit} AI replies per month reached. "
                 "Upgrade to Pro for unlimited replies."
             )
-    text, source = ai_service.generate_reply(message, tone)
+    availability = availability_note(db, user) if include_availability else None
+    text, source = ai_service.generate_reply(message, tone, availability)
     reply = AiReply(
         user_id=user.id, incoming_message=message, tone=tone, generated_reply=text, source=source
     )

@@ -94,7 +94,7 @@ Corporate employees, IT professionals, HR teams, managers and remote workers who
 
 **Rules:**
 - Tones: professional, funny, savage_office_safe, corporate_diplomatic
-- Free plan: 5 AI replies per calendar month (generate and regenerate count). Pro and Team: unlimited. Over-limit returns 402 with an upgrade message
+- Free plan: 20 AI replies per calendar month (generate and regenerate count). Pro and Team: unlimited. Over-limit returns 402 with an upgrade message
 - OpenAI called server-side; on missing key or API failure, use fallback templates per tone and mark source = template (template replies do not count toward the limit)
 - Output must be office-safe: no insults, profanity or HR-risky content
 
@@ -144,7 +144,7 @@ Corporate employees, IT professionals, HR teams, managers and remote workers who
 
 ### Module 6: Billing (Dodo Payments)
 
-**Plans:** Free (5 AI replies/month) · Pro $4.99/month (unlimited replies) · Team $19/month (up to 10 users)
+**Plans:** Free (20 AI replies/month) · Pro $4.99/month (unlimited replies) · Team $19/month (up to 10 users)
 
 **Models:**
 - Subscription: id, user_id, plan, status, dodo_customer_id, dodo_subscription_id, current_period_end, created_at
@@ -213,7 +213,7 @@ Corporate employees, IT professionals, HR teams, managers and remote workers who
 ### AI Reply Generator
 - [ ] All four tones work; regenerate, edit, copy and save work
 - [ ] Works without an OpenAI key via fallback templates
-- [ ] Free plan blocked after 5 AI replies per month with an upgrade prompt
+- [ ] Free plan blocked after 20 AI replies per month with an upgrade prompt
 
 ### Handover
 - [ ] CRUD and completion toggle work; summary generated and copyable

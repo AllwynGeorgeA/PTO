@@ -5,7 +5,9 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-Tone = Literal["professional", "funny", "savage_office_safe", "corporate_diplomatic"]
+Tone = Literal[
+    "professional", "funny", "savage_office_safe", "corporate_diplomatic", "tanglish_manager"
+]
 
 
 class ReplyGenerateIn(BaseModel):
@@ -13,6 +15,8 @@ class ReplyGenerateIn(BaseModel):
 
     message: str = Field(min_length=1, max_length=2000)
     tone: Tone
+    # Tell the sender who to contact and when I am next available (from my PTO plan).
+    include_availability: bool = False
 
 
 class ReplyUpdateIn(BaseModel):
