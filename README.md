@@ -143,20 +143,54 @@ my-saas/
 
 ---
 
-## Run Locally
+## Run Locally (PTOShield AI, Windows PowerShell)
 
-```bash
-# Backend
+Prereqs: Python 3.11+, Node 20+, PostgreSQL running locally with an empty database.
+
+```powershell
+# 0. From repo root: create .env, then edit DATABASE_URL and SECRET_KEY
+#    (SECRET_KEY must be 32+ chars; generate one with:
+#     python -c "import secrets; print(secrets.token_urlsafe(48))")
+#    .env.example ships APP_ENV=development so the placeholder key works locally only.
+Copy-Item .env.example .env
+
+# 1. Backend
 cd backend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 alembic upgrade head
+python scripts\seed.py
 uvicorn app.main:app --reload
+```
 
-# Frontend
+`backend\scripts\seed.py` is the seed script (created separately). If the backend does not find `.env` from `backend\`, also run `Copy-Item ..\.env .env` inside `backend\`.
+
+```powershell
+# 2. Frontend (new terminal, from repo root)
 cd frontend
 npm install
 npm run dev
-
-# Docker
-docker-compose up -d
 ```
+
+API: http://localhost:8000 (health: `/health`). App: http://localhost:5173.
+
+## Run with Docker
+
+```powershell
+Copy-Item .env.example .env      # then set DB_PASSWORD, a real SECRET_KEY (see above) and remove APP_ENV=development
+docker compose up --build -d     # migrations run on backend start
+docker compose exec backend python scripts/seed.py
+docker compose logs -f backend
+docker compose down              # add -v to wipe the database
+```
+
+App: http://localhost:3000, API: http://localhost:8000.
+
+Dev mode with live reload:
+
+```powershell
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+```
+
+Optional vars (`OPENAI_*`, `DODO_*`, `SMTP_*`) can stay blank: template fallback, demo mode, log-only emails.
