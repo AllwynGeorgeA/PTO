@@ -11,7 +11,7 @@ export type PtoFormValues = {
 
 export type PtoFormErrors = Partial<Record<keyof PtoFormValues, string>>
 
-export type ReadinessTier = { label: string; emoji: string; color: 'red' | 'orange' | 'green' }
+export type ReadinessTier = { label: string; emoji: string; color: 'accent' | 'gray' | 'brand' }
 
 export interface AsyncState<T> {
   data: T

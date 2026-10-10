@@ -3,8 +3,10 @@ import type { AiReply, ReplyTone, ReplyUsage } from '../types'
 import type { ReplyUpdate } from '../types/replies'
 import api from './api'
 
-export const generateReply = (message: string, tone: ReplyTone) =>
-  api.post<AiReply>('/replies/generate', { message, tone }).then((r) => r.data)
+export const generateReply = (message: string, tone: ReplyTone, includeAvailability = false) =>
+  api
+    .post<AiReply>('/replies/generate', { message, tone, include_availability: includeAvailability })
+    .then((r) => r.data)
 export const regenerateReply = (id: number) => api.post<AiReply>(`/replies/${id}/regenerate`).then((r) => r.data)
 export const updateReply = (id: number, body: ReplyUpdate) => api.put<AiReply>(`/replies/${id}`, body).then((r) => r.data)
 export const listReplies = (saved?: boolean) =>

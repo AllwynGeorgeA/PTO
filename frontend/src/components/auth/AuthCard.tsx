@@ -1,6 +1,6 @@
 import { Box, Heading, Stack, Text } from '@chakra-ui/react'
 import type { ReactNode } from 'react'
-import { GlassCard } from '../ui/GlassCard'
+import { Card } from '../ui/Card'
 import { GoogleLoginButton } from './GoogleLoginButton'
 
 interface AuthCardProps {
@@ -13,7 +13,7 @@ interface AuthCardProps {
 export function AuthCard({ title, subtitle, children, footer }: AuthCardProps) {
   return (
     <Box maxW="md" mx="auto" mt={{ base: '4', md: '12' }}>
-      <GlassCard>
+      <Card>
         <Stack gap="5">
           <Box>
             <Heading size="2xl">{title}</Heading>
@@ -30,7 +30,7 @@ export function AuthCard({ title, subtitle, children, footer }: AuthCardProps) {
             {footer}
           </Text>
         </Stack>
-      </GlassCard>
+      </Card>
     </Box>
   )
 }

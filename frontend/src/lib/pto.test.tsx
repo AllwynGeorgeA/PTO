@@ -36,10 +36,10 @@ describe('validatePto', () => {
 
 describe('readiness tiers', () => {
   it('maps boundaries', () => {
-    expect(readinessTier(30).color).toBe('red')
-    expect(readinessTier(31).color).toBe('orange')
-    expect(readinessTier(70).color).toBe('orange')
-    expect(readinessTier(71).color).toBe('green')
+    expect(readinessTier(30).color).toBe('accent')
+    expect(readinessTier(31).color).toBe('gray')
+    expect(readinessTier(70).color).toBe('gray')
+    expect(readinessTier(71).color).toBe('brand')
   })
   it('renders score, emoji and message', () => {
     render(

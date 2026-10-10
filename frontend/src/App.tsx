@@ -1,4 +1,4 @@
-﻿import { lazy, Suspense } from 'react'
+import { lazy, Suspense } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { AppLayout } from './components/layout/AppLayout'
@@ -8,7 +8,8 @@ const HomePage = lazy(() => import('./pages/HomePage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const RegisterPage = lazy(() => import('./pages/RegisterPage'))
 const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage'))
-const PricingPage =lazy(() => import('./pages/PricingPage'))
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
+const PricingPage = lazy(() => import('./pages/PricingPage'))
 const DashboardPage = lazy(() => import('./pages/DashboardPage'))
 const PtoListPage = lazy(() => import('./pages/PtoListPage'))
 const PtoFormPage = lazy(() => import('./pages/PtoFormPage'))
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
           <Route path="/pricing" element={<PricingPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
 
         <Route element={<ProtectedRoute />}>

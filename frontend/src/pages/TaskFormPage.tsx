@@ -1,9 +1,12 @@
-import { Button, Field, Heading, HStack, Input, Stack, Text, Textarea } from '@chakra-ui/react'
+import { Button, Field, Heading, HStack, Input, NativeSelect, Stack, Textarea } from '@chakra-ui/react'
 import { useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { PageWrapper } from '../components/layout/PageWrapper'
-import { GlassCard } from '../components/ui/GlassCard'
-import { GradientButton } from '../components/ui/GradientButton'
+import { Card } from '../components/ui/Card'
+import { ErrorNote } from '../components/ui/ErrorNote'
+import { LoadingNote } from '../components/ui/LoadingNote'
+import { toastOk } from '../lib/toast'
+import { PrimaryButton } from '../components/ui/PrimaryButton'
 import { useTask } from '../hooks/useHandover'
 import { usePtoPlans } from '../hooks/usePtoPlans'
 import { createTask, updateTask } from '../services/handover'
@@ -17,7 +20,7 @@ export default function TaskFormPage() {
   const { id } = useParams()
   const editId = id ? Number(id) : null
   const { data: existing, loading } = useTask(editId)
-  if (editId !== null && loading) return <Text color="fg.muted">Loading task...</Text>
+  if (editId !== null && loading) return <LoadingNote rows={1} line="Fetching that task from your brain…" />
   const initial: TaskFormValues = existing
     ? {
         name: existing.name,
@@ -59,6 +62,7 @@ function TaskForm({ initial, editId }: { initial: TaskFormValues; editId: number
     try {
       if (editId === null) await createTask(body)
       else await updateTask(editId, body)
+      toastOk(editId === null ? 'Task added! One less thing in your head 🧠' : 'Task updated ✨')
       navigate('/handover')
     } catch (err) {
       setSubmitError(errorMessage(err))
@@ -69,8 +73,8 @@ function TaskForm({ initial, editId }: { initial: TaskFormValues; editId: number
   return (
     <PageWrapper>
       <Stack gap="5" maxW="2xl">
-        <Heading size="xl">{editId === null ? '➕ New handover task' : '✏️ Edit handover task'}</Heading>
-        <GlassCard>
+        <Heading size="xl">{editId === null ? '➕ Empty your brain, one task at a time' : '✏️ Edit handover task'}</Heading>
+        <Card>
           <form onSubmit={onSubmit} noValidate>
             <Stack gap="4">
               <Field.Root invalid={!!errors.name} required>
@@ -84,17 +88,20 @@ function TaskForm({ initial, editId }: { initial: TaskFormValues; editId: number
               </Field.Root>
               <Field.Root>
                 <Field.Label>Priority</Field.Label>
-                <select
-                  aria-label="Priority"
-                  value={values.priority}
-                  onChange={(e) => set('priority', e.target.value as TaskPriority)}
-                >
-                  {PRIORITY_OPTIONS.map((p) => (
-                    <option key={p.value} value={p.value}>
-                      {p.label}
-                    </option>
-                  ))}
-                </select>
+                <NativeSelect.Root>
+                  <NativeSelect.Field
+                    aria-label="Priority"
+                    value={values.priority}
+                    onChange={(e) => set('priority', e.target.value as TaskPriority)}
+                  >
+                    {PRIORITY_OPTIONS.map((p) => (
+                      <option key={p.value} value={p.value}>
+                        {p.label}
+                      </option>
+                    ))}
+                  </NativeSelect.Field>
+                  <NativeSelect.Indicator />
+                </NativeSelect.Root>
               </Field.Root>
               <Field.Root>
                 <Field.Label>Backup person</Field.Label>
@@ -107,35 +114,34 @@ function TaskForm({ initial, editId }: { initial: TaskFormValues; editId: number
               </Field.Root>
               <Field.Root>
                 <Field.Label>PTO plan (optional)</Field.Label>
-                <select
-                  aria-label="PTO plan"
-                  value={values.pto_plan_id}
-                  onChange={(e) => set('pto_plan_id', e.target.value)}
-                >
-                  <option value="">No specific plan</option>
-                  {plans.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.start_date} to {p.end_date} ({p.employee_name})
-                    </option>
-                  ))}
-                </select>
+                <NativeSelect.Root>
+                  <NativeSelect.Field
+                    aria-label="PTO plan"
+                    value={values.pto_plan_id}
+                    onChange={(e) => set('pto_plan_id', e.target.value)}
+                  >
+                    <option value="">No specific plan</option>
+                    {plans.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.start_date} to {p.end_date} ({p.employee_name})
+                      </option>
+                    ))}
+                  </NativeSelect.Field>
+                  <NativeSelect.Indicator />
+                </NativeSelect.Root>
               </Field.Root>
-              {submitError && (
-                <Text role="alert" color="red.500">
-                  {submitError}
-                </Text>
-              )}
+              {submitError && <ErrorNote message={submitError} />}
               <HStack>
-                <GradientButton type="submit" loading={saving} disabled={saving}>
+                <PrimaryButton type="submit" loading={saving} disabled={saving}>
                   {editId === null ? 'Add task' : 'Save changes'}
-                </GradientButton>
+                </PrimaryButton>
                 <Button variant="ghost" onClick={() => navigate('/handover')}>
                   Cancel
                 </Button>
               </HStack>
             </Stack>
           </form>
-        </GlassCard>
+        </Card>
       </Stack>
     </PageWrapper>
   )

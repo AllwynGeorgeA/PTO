@@ -1,12 +1,15 @@
-import { Button, DataList, Flex, Heading, Skeleton, Text } from '@chakra-ui/react'
+import { Button, DataList, Flex, Skeleton } from '@chakra-ui/react'
 import { useState } from 'react'
 import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
 import { PageWrapper } from '../components/layout/PageWrapper'
+import { Countdown } from '../components/pto/Countdown'
 import { StatusBadge } from '../components/pto/StatusBadge'
-import { GlassCard } from '../components/ui/GlassCard'
+import { Card } from '../components/ui/Card'
+import { ErrorNote } from '../components/ui/ErrorNote'
+import { toastOk } from '../lib/toast'
 import { usePtoPlan } from '../hooks/usePtoPlans'
 import { daysUntil } from '../lib/format'
-import { countdownText, errorMessage, formatDate } from '../lib/pto'
+import { errorMessage, formatDate } from '../lib/pto'
 import { ptoService } from '../services/ptoService'
 
 export default function PtoDetailPage() {
@@ -17,9 +20,10 @@ export default function PtoDetailPage() {
   const [actionError, setActionError] = useState<string | null>(null)
 
   const onDelete = async () => {
-    if (!plan || !window.confirm(`Delete the PTO plan for ${plan.employee_name}?`)) return
+    if (!plan || !window.confirm('Delete this leave? Your boss will be thrilled. 🙃')) return
     try {
       await ptoService.remove(plan.id)
+      toastOk('Leave deleted. Your boss is thrilled. 🎊')
       navigate('/pto')
     } catch (e) {
       setActionError(errorMessage(e))
@@ -27,34 +31,26 @@ export default function PtoDetailPage() {
   }
 
   if (loading) return <Skeleton height="240px" borderRadius="card" />
-  if (!plan)
-    return (
-      <Text role="alert" color="red.500">
-        {error ?? 'PTO plan not found.'}
-      </Text>
-    )
+  if (!plan) return <ErrorNote message={error ?? 'PTO plan not found. Maybe it took a vacation too. 🏝️'} />
 
   const dayNumber = 1 - daysUntil(plan.start_date)
   const details: [string, string][] = [
     ['Dates', `${formatDate(plan.start_date)} to ${formatDate(plan.end_date)}`],
     ['Backup person', plan.backup_person],
     ['Contact email', plan.contact_email],
-    ['Reason', plan.reason ?? 'Not specified'],
+    ['Reason', plan.reason ?? 'Not specified (mysterious 🕵️)'],
   ]
 
   return (
     <PageWrapper>
-      <GlassCard textAlign="center" mb="6" py="10">
+      <Card textAlign="center" mb="6" py="10">
         <StatusBadge status={plan.status} />
-        <Heading size="3xl" mt="3">
-          {countdownText(plan.status, plan.days_remaining, dayNumber)}
-        </Heading>
-        <Text color="fg.muted" mt="1">
-          {plan.employee_name}
-        </Text>
-      </GlassCard>
+        <Flex justify="center" mt="4">
+          <Countdown status={plan.status} daysRemaining={plan.days_remaining} dayNumber={dayNumber} />
+        </Flex>
+      </Card>
 
-      <GlassCard mb="6">
+      <Card mb="6">
         <DataList.Root>
           {details.map(([label, value]) => (
             <DataList.Item key={label}>
@@ -63,25 +59,21 @@ export default function PtoDetailPage() {
             </DataList.Item>
           ))}
         </DataList.Root>
-      </GlassCard>
+      </Card>
 
-      {actionError && (
-        <Text role="alert" color="red.500" mb="3">
-          {actionError}
-        </Text>
-      )}
-      <Flex gap="3" wrap="wrap">
-        <Button asChild colorPalette="brand">
-          <RouterLink to="/handover">Handover tasks</RouterLink>
+      {actionError && <ErrorNote message={actionError} />}
+      <Flex gap="3" wrap="wrap" mt="3">
+        <Button asChild rounded="full" minH="11">
+          <RouterLink to="/handover">📋 Handover tasks</RouterLink>
         </Button>
-        <Button asChild colorPalette="brand" variant="outline">
-          <RouterLink to="/replies/new">Generate reply</RouterLink>
+        <Button asChild variant="outline" rounded="full" minH="11">
+          <RouterLink to="/replies/new">✉️ Generate reply</RouterLink>
         </Button>
-        <Button asChild variant="outline">
-          <RouterLink to={`/pto/${plan.id}/edit`}>Edit</RouterLink>
+        <Button asChild variant="outline" rounded="full" minH="11">
+          <RouterLink to={`/pto/${plan.id}/edit`}>✏️ Edit</RouterLink>
         </Button>
-        <Button colorPalette="red" variant="outline" onClick={() => void onDelete()}>
-          Delete
+        <Button colorPalette="accent" variant="outline" rounded="full" minH="11" onClick={() => void onDelete()}>
+          🗑️ Delete
         </Button>
       </Flex>
     </PageWrapper>

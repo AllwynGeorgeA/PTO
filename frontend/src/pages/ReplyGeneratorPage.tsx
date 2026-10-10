@@ -1,24 +1,30 @@
-import { Badge, Button, Heading, HStack, Stack, Text, Textarea } from '@chakra-ui/react'
+import { Badge, Button, Heading, HStack, Stack } from '@chakra-ui/react'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { PageWrapper } from '../components/layout/PageWrapper'
 import { ReplyCard } from '../components/replies/ReplyCard'
-import { TonePicker } from '../components/replies/TonePicker'
+import { ReplyComposer } from '../components/replies/ReplyComposer'
 import { UpgradePrompt } from '../components/replies/UpgradePrompt'
-import { GlassCard } from '../components/ui/GlassCard'
-import { GradientButton } from '../components/ui/GradientButton'
+import { Card } from '../components/ui/Card'
+import { ErrorNote } from '../components/ui/ErrorNote'
+import { useFun } from '../hooks/useFun'
+import { LoadingNote } from '../components/ui/LoadingNote'
+import { toastOk } from '../lib/toast'
+import { useReplyPrefs } from '../hooks/useReplyPrefs'
 import { useReplyUsage } from '../hooks/useReplies'
 import { errorMessage, generateReply, isLimitReached, regenerateReply, updateReply } from '../services/replies'
-import type { AiReply, ReplyTone } from '../types'
-import { EXAMPLE_MESSAGES, type ReplyUpdate } from '../types/replies'
+import type { AiReply } from '../types'
+import type { ReplyUpdate } from '../types/replies'
 
 export default function ReplyGeneratorPage() {
   const [message, setMessage] = useState('')
-  const [tone, setTone] = useState<ReplyTone>('professional')
+  const prefs = useReplyPrefs()
   const [reply, setReply] = useState<AiReply | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [limit, setLimit] = useState<string | null>(null)
   const usage = useReplyUsage()
+  const { burst } = useFun()
   const u = usage.data
 
   const run = async (fn: () => Promise<AiReply>) => {
@@ -40,7 +46,12 @@ export default function ReplyGeneratorPage() {
     if (!reply) return
     setBusy(true)
     try {
-      setReply(await updateReply(reply.id, body))
+      const updated = await updateReply(reply.id, body)
+      setReply(updated)
+      if (body.is_saved === true) {
+        burst()
+        toastOk('Saved! Future you says thanks ⭐')
+      }
     } catch (e) {
       setError(errorMessage(e))
     } finally {
@@ -48,52 +59,38 @@ export default function ReplyGeneratorPage() {
     }
   }
 
+  const generate = () => void run(() => generateReply(message.trim(), prefs.tone, prefs.includeAvailability))
+
   return (
     <PageWrapper>
       <Stack gap="5" maxW="3xl">
         <HStack justify="space-between" wrap="wrap">
-          <Heading size="xl">✉️ Auto-Reply Generator</Heading>
-          {u && (
-            <Badge size="lg" colorPalette={u.limit !== null && u.used >= u.limit ? 'red' : 'teal'}>
-              {u.limit === null ? 'Unlimited replies' : `${u.used}/${u.limit} free replies used this month`}
-            </Badge>
-          )}
+          <Heading size="2xl">✉️ Excuse generator</Heading>
+          <HStack>
+            {u && (
+              <Badge size="lg" colorPalette={u.limit !== null && u.used >= u.limit ? 'accent' : 'brand'}>
+                {u.limit === null ? 'Unlimited replies ♾️' : `${u.used}/${u.limit} free replies used this month`}
+              </Badge>
+            )}
+            <Button asChild variant="outline" rounded="full" size="sm" minH="11">
+              <Link to="/replies">⭐ Saved</Link>
+            </Button>
+          </HStack>
         </HStack>
-        <GlassCard>
-          <Stack gap="4">
-            <Text fontWeight="semibold">What did your colleague just send?</Text>
-            <Textarea
-              aria-label="Colleague message"
-              placeholder="Paste the message you are definitely not answering on vacation..."
-              value={message}
-              maxLength={2000}
-              rows={4}
-              onChange={(e) => setMessage(e.target.value)}
-            />
-            <HStack wrap="wrap" gap="2" aria-label="Example messages">
-              {EXAMPLE_MESSAGES.map((m) => (
-                <Button key={m} size="xs" variant="subtle" rounded="full" onClick={() => setMessage(m)}>
-                  {m}
-                </Button>
-              ))}
-            </HStack>
-            <Text fontWeight="semibold">Pick your tone</Text>
-            <TonePicker value={tone} onChange={setTone} />
-            <GradientButton
-              alignSelf="flex-start"
-              disabled={busy || !message.trim()}
-              loading={busy && !reply}
-              onClick={() => void run(() => generateReply(message.trim(), tone))}
-            >
-              ✨ Generate reply
-            </GradientButton>
-          </Stack>
-        </GlassCard>
-        {error && (
-          <Text role="alert" color="red.500">
-            {error}
-          </Text>
-        )}
+        <Card>
+          <ReplyComposer
+            message={message}
+            onMessage={setMessage}
+            tone={prefs.tone}
+            onTone={prefs.setTone}
+            includeAvailability={prefs.includeAvailability}
+            onInclude={prefs.setIncludeAvailability}
+            busy={busy}
+            onSubmit={generate}
+          />
+        </Card>
+        {busy && !reply && <LoadingNote rows={1} line="Asking the AI to stall your boss…" />}
+        {error && <ErrorNote message={error} />}
         {limit !== null && <UpgradePrompt message={limit || undefined} />}
         {reply && (
           <ReplyCard

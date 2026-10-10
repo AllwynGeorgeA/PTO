@@ -12,6 +12,7 @@ export const TONE_OPTIONS: ToneOption[] = [
   { value: 'funny', emoji: '😂', label: 'Funny', hint: 'HR may or may not laugh' },
   { value: 'savage_office_safe', emoji: '😎', label: 'Savage (office safe)', hint: 'Sharp, but no incident report' },
   { value: 'corporate_diplomatic', emoji: '🕊️', label: 'Corporate diplomatic', hint: 'Says no without saying no' },
+  { value: 'tanglish_manager', emoji: '🌴', label: 'Tanglish to manager', hint: 'Funny Tamil-English, respectful boss mode' },
 ]
 
 export const EXAMPLE_MESSAGES: string[] = [

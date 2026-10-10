@@ -1,9 +1,9 @@
 import type { TaskPriority, TaskStatus } from './index'
 
 export const PRIORITY_OPTIONS: { value: TaskPriority; label: string; color: string }[] = [
-  { value: 'high', label: 'High', color: 'red' },
-  { value: 'medium', label: 'Medium', color: 'orange' },
-  { value: 'low', label: 'Low', color: 'green' },
+  { value: 'high', label: 'High 🔥', color: 'accent' },
+  { value: 'medium', label: 'Medium', color: 'brand' },
+  { value: 'low', label: 'Low 🧊', color: 'gray' },
 ]
 
 export const STATUS_OPTIONS: { value: TaskStatus | 'all'; label: string }[] = [

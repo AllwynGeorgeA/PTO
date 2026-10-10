@@ -48,7 +48,7 @@ export type PtoPlanInput = Pick<
   'employee_name' | 'start_date' | 'end_date' | 'backup_person' | 'contact_email' | 'reason'
 >
 
-export type ReplyTone = 'professional' | 'funny' | 'savage_office_safe' | 'corporate_diplomatic'
+export type ReplyTone = 'professional' | 'funny' | 'savage_office_safe' | 'corporate_diplomatic' | 'tanglish_manager'
 export type ReplySource = 'openai' | 'template'
 
 export interface AiReply {

@@ -1,80 +1,82 @@
-import { Box, Button, Flex, Heading, IconButton, Text } from '@chakra-ui/react'
-import { useState } from 'react'
+import { Box, Button, Flex, Text } from '@chakra-ui/react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { QuickReply } from '../replies/QuickReply'
+import { Logo } from '../ui/Logo'
 import { ThemeToggle } from '../ui/ThemeToggle'
-import { NavLinks, type NavItem } from './NavLinks'
+import { BottomNav, NavLinks, type NavItem } from './NavLinks'
 
-const baseItems: NavItem[] = [
-  { to: '/dashboard', label: '🏝️ Dashboard' },
-  { to: '/pto', label: '📅 PTO Plans' },
-  { to: '/replies/new', label: '✉️ Auto-Replies' },
-  { to: '/replies', label: '💾 Saved Replies' },
-  { to: '/handover', label: '📋 Handover' },
-  { to: '/settings', label: '⚙️ Settings' },
+const sidebarItems: NavItem[] = [
+  { to: '/dashboard', emoji: '🏝️', label: 'Home' },
+  { to: '/pto', emoji: '📅', label: 'PTO plans' },
+  { to: '/replies/new', emoji: '✉️', label: 'Auto-replies' },
+  { to: '/replies', emoji: '⭐', label: 'Saved replies', end: true },
+  { to: '/handover', emoji: '📋', label: 'Handover' },
+  { to: '/settings', emoji: '⚙️', label: 'Settings' },
+]
+
+// Mobile gets the 5 main routes.
+const bottomItems: NavItem[] = [
+  { to: '/dashboard', emoji: '🏝️', label: 'Home' },
+  { to: '/pto', emoji: '📅', label: 'PTO' },
+  { to: '/replies/new', emoji: '✉️', label: 'Replies' },
+  { to: '/handover', emoji: '📋', label: 'Tasks' },
+  { to: '/settings', emoji: '⚙️', label: 'Settings' },
 ]
 
 export function AppLayout() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const [open, setOpen] = useState(false)
 
   const handleLogout = () => {
     logout()
     navigate('/')
   }
 
-  const sidebar = (
-    <Flex direction="column" gap="6" h="full">
-      <Heading size="lg" color="brand.fg">
-        🛡️ PTOShield AI
-      </Heading>
-      <NavLinks items={baseItems} onNavigate={() => setOpen(false)} />
-      <Box mt="auto">
-        <Text fontSize="sm" color="fg.muted" mb="2" truncate>
-          {user?.email}
-        </Text>
-        <Button size="sm" variant="outline" rounded="full" onClick={handleLogout}>
-          Log out
-        </Button>
-      </Box>
-    </Flex>
-  )
-
   return (
     <Flex minH="100vh" direction={{ base: 'column', md: 'row' }}>
-      <Flex display={{ base: 'flex', md: 'none' }} align="center" justify="space-between" p="3" borderBottomWidth="1px" borderColor="border">
-        <Heading size="md" color="brand.fg">
-          🛡️ PTOShield AI
-        </Heading>
-        <Flex gap="1">
-          <ThemeToggle />
-          <IconButton aria-label="Toggle menu" variant="ghost" rounded="full" onClick={() => setOpen((o) => !o)}>
-            {open ? '✕' : '☰'}
-          </IconButton>
-        </Flex>
+      <Flex display={{ base: 'flex', md: 'none' }} align="center" justify="space-between" px="4" py="2" borderBottomWidth="1px" borderColor="border">
+        <Logo to="/dashboard" />
+        <ThemeToggle />
       </Flex>
 
-      <Box
-        display={{ base: open ? 'block' : 'none', md: 'block' }}
-        w={{ base: 'full', md: '64' }}
+      <Flex
+        display={{ base: 'none', md: 'flex' }}
+        direction="column"
+        gap="6"
+        w="64"
         flexShrink={0}
         p="5"
-        borderRightWidth={{ base: '0', md: '1px' }}
+        borderRightWidth="1px"
         borderColor="border"
         bg="surface"
+        position="sticky"
+        top="0"
+        h="100vh"
       >
-        {sidebar}
-      </Box>
+        <Logo to="/dashboard" />
+        <NavLinks items={sidebarItems} />
+        <Box mt="auto">
+          <Text fontSize="sm" color="fg.muted" mb="2" truncate>
+            {user?.email}
+          </Text>
+          <Button size="sm" variant="outline" rounded="full" onClick={handleLogout}>
+            Log out 👋
+          </Button>
+        </Box>
+      </Flex>
 
       <Box flex="1" minW="0">
         <Flex display={{ base: 'none', md: 'flex' }} justify="flex-end" p="3">
           <ThemeToggle />
         </Flex>
-        <Box p={{ base: '4', md: '8' }}>
+        <Box p={{ base: '4', md: '8' }} pb={{ base: '36', md: '24' }} maxW="5xl">
           <Outlet />
         </Box>
       </Box>
+
+      <QuickReply />
+      <BottomNav items={bottomItems} />
     </Flex>
   )
 }

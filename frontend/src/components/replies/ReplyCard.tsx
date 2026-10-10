@@ -3,8 +3,8 @@ import { useState } from 'react'
 import { canShare, shareText } from '../../lib/clipboard'
 import type { AiReply } from '../../types'
 import { TONE_OPTIONS } from '../../types/replies'
+import { Card } from '../ui/Card'
 import { CopyButton } from '../ui/CopyButton'
-import { GlassCard } from '../ui/GlassCard'
 
 interface Props {
   reply: AiReply
@@ -27,12 +27,12 @@ export function ReplyCard({ reply, onEdit, onToggleSave, onRegenerate, onDelete,
   }
 
   return (
-    <GlassCard>
+    <Card>
       <HStack mb="2" wrap="wrap" gap="2">
-        <Badge colorPalette="teal">
+        <Badge colorPalette="brand">
           {tone?.emoji} {tone?.label ?? reply.tone}
         </Badge>
-        {reply.source === 'template' && <Badge variant="subtle">Template reply</Badge>}
+        {reply.source === 'template' && <Badge variant="subtle" colorPalette="gray">Template reply</Badge>}
       </HStack>
       <Text fontSize="sm" color="fg.muted" mb="3">
         Re: {reply.incoming_message}
@@ -73,22 +73,22 @@ export function ReplyCard({ reply, onEdit, onToggleSave, onRegenerate, onDelete,
             </Button>
             {onRegenerate && (
               <Button size="sm" variant="outline" rounded="full" onClick={onRegenerate} disabled={busy}>
-                🔄 Regenerate
+                🔄 Another take
               </Button>
             )}
             {onToggleSave && (
-              <Button size="sm" rounded="full" onClick={onToggleSave} disabled={busy}>
-                {reply.is_saved ? '⭐ Saved' : '☆ Save'}
+              <Button size="sm" rounded="full" variant={reply.is_saved ? 'subtle' : 'solid'} onClick={onToggleSave} disabled={busy}>
+                {reply.is_saved ? '⭐ Saved' : '☆ Save for later'}
               </Button>
             )}
             {onDelete && (
-              <Button size="sm" variant="ghost" colorPalette="red" onClick={onDelete} disabled={busy}>
-                🗑️ Delete
+              <Button size="sm" variant="ghost" colorPalette="accent" onClick={onDelete} disabled={busy}>
+                🗑️ Bin it
               </Button>
             )}
           </HStack>
         </>
       )}
-    </GlassCard>
+    </Card>
   )
 }

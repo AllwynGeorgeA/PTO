@@ -9,8 +9,8 @@ export const STATUS_LABEL: Record<PtoStatus, string> = {
 }
 
 export const STATUS_COLOR: Record<PtoStatus, string> = {
-  upcoming: 'blue',
-  active: 'green',
+  upcoming: 'brand',
+  active: 'accent',
   completed: 'gray',
 }
 
@@ -24,22 +24,22 @@ export function countdownText(status: PtoStatus, daysRemaining: number, dayNumbe
 }
 
 export function readinessTier(score: number): ReadinessTier {
-  if (score <= 30) return { label: 'Not ready', emoji: '🚨', color: 'red' }
-  if (score <= 70) return { label: 'Getting there', emoji: '😅', color: 'orange' }
-  return { label: 'Vacation ready', emoji: '🏝️', color: 'green' }
+  if (score <= 30) return { label: 'Not ready', emoji: '🚨', color: 'accent' }
+  if (score <= 70) return { label: 'Getting there', emoji: '😅', color: 'gray' }
+  return { label: 'Vacation ready', emoji: '🏝️', color: 'brand' }
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export function validatePto(v: PtoFormValues): PtoFormErrors {
   const e: PtoFormErrors = {}
-  if (!v.employee_name.trim()) e.employee_name = 'Name is required'
-  if (!v.start_date) e.start_date = 'Start date is required'
-  if (!v.end_date) e.end_date = 'End date is required'
-  else if (v.start_date && v.end_date < v.start_date) e.end_date = 'End date must be on or after the start date'
-  if (!v.backup_person.trim()) e.backup_person = 'Backup person is required'
-  if (!v.contact_email.trim()) e.contact_email = 'Contact email is required'
-  else if (!EMAIL_RE.test(v.contact_email.trim())) e.contact_email = 'Enter a valid email address'
+  if (!v.employee_name.trim()) e.employee_name = 'Your name, please. Even ghosts sign the register. 👻'
+  if (!v.start_date) e.start_date = 'When does the freedom begin? Pick a start date. 🗓️'
+  if (!v.end_date) e.end_date = 'Every escape needs a return date. Pick an end date. 🛬'
+  else if (v.start_date && v.end_date < v.start_date) e.end_date = 'End date must be on or after the start date (time travel is not covered) ⏳'
+  if (!v.backup_person.trim()) e.backup_person = 'Who will hold the fort? Add a backup person. 🏰'
+  if (!v.contact_email.trim()) e.contact_email = 'Where can people (not) reach you? Add a contact email. 📧'
+  else if (!EMAIL_RE.test(v.contact_email.trim())) e.contact_email = 'Enter a valid email address (we promise no spam) 📧'
   return e
 }
 
@@ -47,9 +47,9 @@ export function errorMessage(err: unknown): string {
   if (isAxiosError<{ detail?: unknown }>(err)) {
     const d = err.response?.data?.detail
     if (typeof d === 'string') return d
-    if (err.response?.status === 422) return 'Please check the dates and fields and try again.'
+    if (err.response?.status === 422) return 'Those dates and fields look a bit off. Check them and try again. 🧐'
   }
-  return 'Something went wrong. Please try again.'
+  return 'Please try again in a moment.'
 }
 
 export const formatDate = (iso: string): string => {

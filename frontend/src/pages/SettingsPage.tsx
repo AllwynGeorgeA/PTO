@@ -2,9 +2,10 @@ import { Badge, Button, Field, Flex, Heading, Input, Stack, Text } from '@chakra
 import { useState, type FormEvent } from 'react'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import { apiErrorMessage, passwordError } from '../components/auth/validation'
+import { toastOk } from '../lib/toast'
 import { PageWrapper } from '../components/layout/PageWrapper'
-import { GlassCard } from '../components/ui/GlassCard'
-import { GradientButton } from '../components/ui/GradientButton'
+import { Card } from '../components/ui/Card'
+import { PrimaryButton } from '../components/ui/PrimaryButton'
 import { ThemeToggle } from '../components/ui/ThemeToggle'
 import { useAuth } from '../context/AuthContext'
 import api from '../services/api'
@@ -15,7 +16,7 @@ type Status = { kind: 'ok' | 'error'; text: string } | null
 function StatusText({ status }: { status: Status }) {
   if (!status) return null
   return (
-    <Text role={status.kind === 'error' ? 'alert' : 'status'} color={status.kind === 'error' ? 'red.500' : 'green.500'} fontSize="sm">
+    <Text role={status.kind === 'error' ? 'alert' : 'status'} color={status.kind === 'error' ? 'accent.fg' : 'brand.fg'} fontSize="sm">
       {status.text}
     </Text>
   )
@@ -53,6 +54,7 @@ function ProfileCard({ user }: { user: User }) {
       setCurrent('')
       setNext('')
       setStatus({ kind: 'ok', text: 'Saved. Looking sharp. ✨' })
+      toastOk('Saved. Looking sharp. ✨')
     } catch (err) {
       setStatus({ kind: 'error', text: apiErrorMessage(err, 'Could not save changes. Please try again.') })
     } finally {
@@ -61,7 +63,7 @@ function ProfileCard({ user }: { user: User }) {
   }
 
   return (
-    <GlassCard>
+    <Card>
       <Heading size="lg" mb="4">
         👤 Profile
       </Heading>
@@ -88,12 +90,12 @@ function ProfileCard({ user }: { user: User }) {
             <Field.ErrorText>{fieldError.next}</Field.ErrorText>
           </Field.Root>
           <StatusText status={status} />
-          <GradientButton type="submit" loading={saving} alignSelf="flex-start">
+          <PrimaryButton type="submit" loading={saving} alignSelf="flex-start">
             Save changes
-          </GradientButton>
+          </PrimaryButton>
         </Stack>
       </form>
-    </GlassCard>
+    </Card>
   )
 }
 
@@ -105,19 +107,19 @@ export default function SettingsPage() {
   return (
     <PageWrapper>
       <Stack gap="6" maxW="2xl">
-        <Heading size="2xl">⚙️ Settings</Heading>
+        <Heading size="2xl">⚙️ Tweak your setup</Heading>
         <ProfileCard user={user} />
-        <GlassCard>
+        <Card>
           <Flex align="center" justify="space-between" wrap="wrap" gap="3">
             <Heading size="lg">🎨 Appearance</Heading>
             <ThemeToggle />
           </Flex>
-        </GlassCard>
-        <GlassCard>
+        </Card>
+        <Card>
           <Flex align="center" justify="space-between" wrap="wrap" gap="3">
             <Stack gap="1">
               <Heading size="lg">💳 Plan</Heading>
-              <Badge colorPalette="brand" size="lg" alignSelf="flex-start" textTransform="capitalize">
+              <Badge size="lg" alignSelf="flex-start" textTransform="capitalize">
                 {user.plan}
               </Badge>
             </Stack>
@@ -125,23 +127,23 @@ export default function SettingsPage() {
               <RouterLink to="/pricing">Compare plans</RouterLink>
             </Button>
           </Flex>
-        </GlassCard>
-        <GlassCard>
+        </Card>
+        <Card>
           <Flex align="center" justify="space-between" wrap="wrap" gap="3">
             <Heading size="lg">🚪 Session</Heading>
             <Button
               variant="outline"
               rounded="full"
-              colorPalette="red"
+              colorPalette="accent"
               onClick={() => {
                 logout()
                 navigate('/login', { replace: true })
               }}
             >
-              Log out
+              Log out 👋
             </Button>
           </Flex>
-        </GlassCard>
+        </Card>
       </Stack>
     </PageWrapper>
   )

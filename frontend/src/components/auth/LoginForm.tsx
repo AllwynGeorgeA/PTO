@@ -1,7 +1,7 @@
 import { Button, Field, Input, Stack, Text } from '@chakra-ui/react'
 import { useState, type FormEvent } from 'react'
 import { useAuth } from '../../context/AuthContext'
-import { GradientButton } from '../ui/GradientButton'
+import { PrimaryButton } from '../ui/PrimaryButton'
 import { apiErrorMessage, emailError } from './validation'
 
 // Public demo account created by `python -m scripts.seed`. Shown in dev, or when VITE_DEMO_LOGIN=true.
@@ -65,13 +65,13 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
           <Field.ErrorText>{errors.password}</Field.ErrorText>
         </Field.Root>
         {formError && (
-          <Text role="alert" color="red.500" fontSize="sm">
+          <Text role="alert" color="accent.fg" fontSize="sm">
             {formError}
           </Text>
         )}
-        <GradientButton type="submit" loading={loading}>
-          Log in
-        </GradientButton>
+        <PrimaryButton type="submit" loading={loading}>
+          Let me in 🔑
+        </PrimaryButton>
         {SHOW_DEMO && (
           <Button type="button" variant="outline" onClick={demoLogin} disabled={loading}>
             🏝️ Try the demo account

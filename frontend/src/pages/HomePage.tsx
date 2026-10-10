@@ -1,73 +1,65 @@
-import { Box, Button, Flex, Heading, SimpleGrid, Stack, Text } from '@chakra-ui/react'
+import { Button, Flex, Heading, SimpleGrid, Stack, Text } from '@chakra-ui/react'
 import { Link as RouterLink } from 'react-router-dom'
-import { GlassCard } from '../components/ui/GlassCard'
-import { GradientButton } from '../components/ui/GradientButton'
+import { TryItDemo } from '../components/landing/TryItDemo'
+import { Card } from '../components/ui/Card'
+import { PrimaryButton } from '../components/ui/PrimaryButton'
+import { useMotionOk } from '../hooks/useMotion'
 import { MotionBox } from '../lib/motion'
 
 const FEATURES = [
-  { emoji: '🗓️', title: 'PTO Planner', text: 'Plan time off, track balances, and let the calendar do the guilt management.' },
-  { emoji: '🤖', title: 'Funny AI Replies', text: 'Out-of-office messages that are professional, polite, and just a little bit smug.' },
-  { emoji: '🤝', title: 'Handover Assistant', text: 'Hand off tasks cleanly so nobody pings you on a beach. Synergy, but chill.' },
-  { emoji: '📊', title: 'Readiness Score', text: 'One number that says whether you are truly ready to disappear. Spoiler: aim for 100.' },
-]
-
-const STEPS = [
-  { emoji: '1️⃣', title: 'Add your PTO', text: 'Pick your dates and tell us where the sunshine is.' },
-  { emoji: '2️⃣', title: 'Hand over your tasks', text: 'List what is in flight and who catches it.' },
-  { emoji: '3️⃣', title: 'Generate your reply', text: 'Get a ready-to-send out-of-office in your tone of choice.' },
-  { emoji: '4️⃣', title: 'Switch off', text: 'Check your readiness score, then enjoy your peace.' },
+  { emoji: '🗓️', title: 'PTO planner', text: 'Plan time off and let the calendar handle the guilt.' },
+  { emoji: '🤖', title: 'Funny AI replies', text: 'Out-of-office messages that are polite, professional and a little bit smug.' },
+  { emoji: '🤝', title: 'Handover helper', text: 'Hand off tasks cleanly so nobody pings you on a beach.' },
 ]
 
 const PLANS = [
-  { name: 'Free', price: '$0', text: 'Plan PTO and try the basics.' },
-  { name: 'Pro', price: '$4.99', text: 'Unlimited AI replies and handover tools.', highlight: true },
-  { name: 'Team', price: '$19', text: 'Shared handovers for the whole crew.' },
+  { name: 'Free', price: '$0', text: '20 replies a month', emoji: '🆓' },
+  { name: 'Pro', price: '$4.99', text: 'Unlimited AI replies', emoji: '😎', highlight: true },
+  { name: 'Team', price: '$19', text: 'Up to 10 teammates', emoji: '👯' },
 ]
 
-const fadeUp = {
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true },
-  transition: { duration: 0.5 },
-}
-
 export default function HomePage() {
+  const ok = useMotionOk()
   return (
-    <Stack gap={{ base: '16', md: '24' }}>
-      <Stack as="section" align="center" textAlign="center" gap="6" pt={{ base: '8', md: '16' }} maxW="3xl" mx="auto">
-        <MotionBox initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} fontSize="6xl" aria-hidden="true">
-          🏝️
+    <Stack gap={{ base: '14', md: '20' }} maxW="5xl" mx="auto">
+      <Stack as="section" align="center" textAlign="center" gap="6" pt={{ base: '6', md: '12' }}>
+        <MotionBox
+          fontSize="7xl"
+          aria-hidden="true"
+          animate={ok ? { y: [0, -12, 0], rotate: [0, -6, 6, 0] } : undefined}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          🦥
         </MotionBox>
-        <MotionBox initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-          <Heading as="h1" size={{ base: '3xl', md: '5xl' }} lineHeight="1.1">
-            Your PTO is approved.{' '}
-            <Text as="span" bgGradient="to-r" gradientFrom="ocean.400" gradientTo="sunset.400" bgClip="text">
-              Your peace is protected.
-            </Text>{' '}
-            😂
-          </Heading>
-        </MotionBox>
-        <Text fontSize={{ base: 'md', md: 'xl' }} color="fg.muted">
-          PTOShield AI plans your time off, drafts witty out-of-office replies, and hands over your work, so you can
+        <Heading as="h1" size={{ base: '3xl', md: '5xl' }} lineHeight="1.1">
+          Your PTO is approved.{' '}
+          <Text as="span" color="brand.fg">
+            Your peace is protected.
+          </Text>{' '}
+          😂
+        </Heading>
+        <Text fontSize={{ base: 'md', md: 'xl' }} color="fg.muted" maxW="2xl">
+          PTOShield AI plans your time off, writes witty out-of-office replies and hands over your work, so you can
           actually unplug.
         </Text>
         <Flex gap="3" wrap="wrap" justify="center">
-          <GradientButton asChild size="lg">
+          <PrimaryButton asChild size="lg">
             <RouterLink to="/register">Start free 🌴</RouterLink>
-          </GradientButton>
-          <Button asChild size="lg" variant="outline" rounded="full">
-            <RouterLink to="/pricing">See pricing</RouterLink>
+          </PrimaryButton>
+          <Button asChild size="lg" variant="outline" rounded="full" minH="11">
+            <RouterLink to="/login">I already escaped</RouterLink>
           </Button>
         </Flex>
+        <TryItDemo />
       </Stack>
 
-      <Box as="section" aria-labelledby="features-heading">
+      <section aria-labelledby="features-heading">
         <Heading id="features-heading" size="3xl" textAlign="center" mb="8">
           Everything between you and the beach 🏖️
         </Heading>
-        <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} gap="5">
+        <SimpleGrid columns={{ base: 1, md: 3 }} gap="5">
           {FEATURES.map((f) => (
-            <GlassCard key={f.title}>
+            <Card key={f.title} whileHover={ok ? { y: -6, rotate: -1.5 } : undefined} whileTap={ok ? { scale: 0.97 } : undefined}>
               <Text fontSize="4xl" aria-hidden="true">
                 {f.emoji}
               </Text>
@@ -75,40 +67,24 @@ export default function HomePage() {
                 {f.title}
               </Heading>
               <Text color="fg.muted">{f.text}</Text>
-            </GlassCard>
+            </Card>
           ))}
         </SimpleGrid>
-      </Box>
+      </section>
 
-      <Box as="section" aria-labelledby="how-heading">
-        <Heading id="how-heading" size="3xl" textAlign="center" mb="8">
-          How it works 🧭
-        </Heading>
-        <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} gap="5">
-          {STEPS.map((s) => (
-            <MotionBox key={s.title} {...fadeUp} p="6" borderRadius="card" borderWidth="1px" borderColor="border" bg="surface">
-              <Text fontSize="3xl" aria-hidden="true">
-                {s.emoji}
-              </Text>
-              <Heading size="md" mt="2" mb="1">
-                {s.title}
-              </Heading>
-              <Text color="fg.muted">{s.text}</Text>
-            </MotionBox>
-          ))}
-        </SimpleGrid>
-      </Box>
-
-      <Box as="section" aria-labelledby="pricing-heading">
+      <section aria-labelledby="pricing-heading">
         <Heading id="pricing-heading" size="3xl" textAlign="center" mb="2">
-          Pricing that will not need approval 💸
+          Cheaper than one airport sandwich 🥪
         </Heading>
         <Text textAlign="center" color="fg.muted" mb="8">
-          Cheaper than one overpriced airport sandwich.
+          Pricing that will not need approval.
         </Text>
-        <SimpleGrid columns={{ base: 1, md: 3 }} gap="5" maxW="4xl" mx="auto">
+        <SimpleGrid columns={{ base: 1, md: 3 }} gap="5">
           {PLANS.map((p) => (
-            <GlassCard key={p.name} borderColor={p.highlight ? 'ocean.400' : 'border'} borderWidth={p.highlight ? '2px' : '1px'}>
+            <Card key={p.name} borderColor={p.highlight ? 'brand.solid' : 'border'} borderWidth={p.highlight ? '2px' : '1px'}>
+              <Text fontSize="2xl" aria-hidden="true">
+                {p.emoji}
+              </Text>
               <Heading size="lg">{p.name}</Heading>
               <Text fontSize="4xl" fontWeight="bold">
                 {p.price}
@@ -119,38 +95,28 @@ export default function HomePage() {
                 )}
               </Text>
               <Text color="fg.muted">{p.text}</Text>
-            </GlassCard>
+            </Card>
           ))}
         </SimpleGrid>
         <Flex justify="center" mt="6">
-          <Button asChild variant="outline" rounded="full">
+          <Button asChild variant="outline" rounded="full" minH="11">
             <RouterLink to="/pricing">Compare all plans</RouterLink>
           </Button>
         </Flex>
-      </Box>
+      </section>
 
-      <MotionBox
-        as="section"
-        {...fadeUp}
-        textAlign="center"
-        p={{ base: '8', md: '12' }}
-        borderRadius="card"
-        bgGradient="to-r"
-        gradientFrom="ocean.500"
-        gradientTo="sunset.400"
-        color="white"
-      >
+      <Card textAlign="center" p={{ base: '8', md: '12' }} bg="brand.solid" color="brand.contrast" borderColor="brand.solid">
         <Heading size="3xl" mb="3">
           Ready to be unreachable (professionally)?
         </Heading>
-        <Text mb="6">Set up your first PTO in under two minutes.</Text>
-        <Button asChild size="lg" rounded="full" bg="white" color="ocean.700">
+        <Text mb="6">Set up your first PTO in under two minutes. 🏝️</Text>
+        <Button asChild size="lg" rounded="full" minH="11" bg="bg.panel" color="fg">
           <RouterLink to="/register">Create your free account</RouterLink>
         </Button>
-      </MotionBox>
+      </Card>
 
       <Flex as="footer" justify="space-between" wrap="wrap" gap="3" color="fg.muted" fontSize="sm" pb="4">
-        <Text>🛡️ PTOShield AI. All rights reserved, vacation days included.</Text>
+        <Text>🦥 PTOShield AI. All rights reserved, vacation days included.</Text>
         <Flex gap="4">
           <RouterLink to="/pricing">Pricing</RouterLink>
           <RouterLink to="/login">Log in</RouterLink>

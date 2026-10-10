@@ -1,15 +1,16 @@
-import { Alert, Badge, Box, Button, Heading, SimpleGrid, Spinner, Stack, Text } from '@chakra-ui/react'
+import { Badge, Box, Button, Heading, SimpleGrid, Spinner, Stack, Text } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { ErrorNote } from '../components/ui/ErrorNote'
 import { PageWrapper } from '../components/layout/PageWrapper'
-import { GlassCard } from '../components/ui/GlassCard'
-import { GradientButton } from '../components/ui/GradientButton'
+import { Card } from '../components/ui/Card'
+import { PrimaryButton } from '../components/ui/PrimaryButton'
 import { useAuth } from '../context/AuthContext'
 import { checkout, getPlans } from '../services/billing'
 import type { BillingInfo, PlanId } from '../types'
 
 const BLURBS: Record<PlanId, string> = {
-  free: '5 AI replies/month',
+  free: '20 AI replies/month',
   pro: 'Unlimited AI replies',
   team: 'Up to 10 users',
 }
@@ -19,11 +20,19 @@ const FAQ: { q: string; a: string }[] = [
   { q: 'Can I cancel anytime?', a: 'Yes. Like your out-of-office, it ends when you say so.' },
   {
     q: 'What happens at the free limit?',
-    a: 'You get 5 AI replies a month. After that, the replies take their own PTO until next month.',
+    a: 'You get 20 AI replies a month. After that, the replies take their own PTO until next month.',
   },
   { q: 'Will my boss see I use this?', a: 'Only your very professional replies. The savage ones stay office-safe.' },
   { q: 'Is my data safe?', a: 'Yes. We store what we need to protect your peace, and nothing else.' },
 ]
+
+function Banner({ role, children }: { role: 'status'; children: string }) {
+  return (
+    <Box role={role} p="3" borderRadius="card" bg="brand.subtle" borderWidth="1px" borderColor="brand.border" color="brand.fg" fontWeight="medium">
+      {children}
+    </Box>
+  )
+}
 
 export default function PricingPage() {
   const { user } = useAuth()
@@ -60,30 +69,21 @@ export default function PricingPage() {
     <PageWrapper>
       <Stack gap="8">
         <Box textAlign="center">
-          <Heading size="3xl">Pricing</Heading>
+          <Heading size="3xl">Pricing that will not need approval 💸</Heading>
           <Text color="fg.muted">Your PTO is approved. Your peace is protected.</Text>
         </Box>
 
         {info?.demo && (
-          <Alert.Root status="warning" role="status">
-            <Alert.Indicator />
-            <Alert.Title>Demo mode: payments are not connected, no real charge will be made</Alert.Title>
-          </Alert.Root>
+          <Banner role="status">Demo mode: payments are not connected, no real charge will be made 🎭</Banner>
         )}
         {notice && (
-          <Alert.Root status="info" role="status">
-            <Alert.Indicator />
-            <Alert.Title>{notice}</Alert.Title>
-          </Alert.Root>
+          <Banner role="status">{notice}</Banner>
         )}
         {error && (
-          <Alert.Root status="error" role="alert">
-            <Alert.Indicator />
-            <Alert.Title>{error}</Alert.Title>
-          </Alert.Root>
+          <ErrorNote message={error} />
         )}
 
-        {!info && !error && <Spinner alignSelf="center" size="xl" color="ocean.500" aria-label="Loading plans" />}
+        {!info && !error && <Spinner alignSelf="center" size="xl" color="brand.solid" aria-label="Loading plans" />}
 
         {info && (
           <SimpleGrid columns={{ base: 1, md: 3 }} gap="6">
@@ -91,12 +91,12 @@ export default function PricingPage() {
               const current = user?.plan === p.id
               const popular = p.id === 'pro'
               return (
-                <GlassCard key={p.id} borderColor={popular ? 'ocean.400' : 'border'} borderWidth={popular ? '2px' : '1px'}>
+                <Card key={p.id} borderColor={popular ? 'brand.solid' : 'border'} borderWidth={popular ? '2px' : '1px'}>
                   <Stack gap="4" h="full">
                     <Stack direction="row" justify="space-between" align="center">
                       <Heading size="lg">{p.name}</Heading>
-                      {popular && <Badge colorPalette="orange">Most popular</Badge>}
-                      {current && <Badge colorPalette="green">Current plan</Badge>}
+                      {popular && <Badge colorPalette="accent" variant="solid">Most popular</Badge>}
+                      {current && <Badge colorPalette="brand">Current plan</Badge>}
                     </Stack>
                     <Text fontSize="3xl" fontWeight="bold">
                       {PRICES[p.id] ?? `$${p.price}`}
@@ -121,16 +121,16 @@ export default function PricingPage() {
                         {current ? 'Current plan' : 'Included'}
                       </Button>
                     ) : (
-                      <GradientButton
+                      <PrimaryButton
                         onClick={() => void choose(p.id === 'team' ? 'team' : 'pro')}
                         loading={busy === p.id}
                         aria-label={`Choose ${p.name} plan`}
                       >
                         Choose {p.name}
-                      </GradientButton>
+                      </PrimaryButton>
                     )}
                   </Stack>
-                </GlassCard>
+                </Card>
               )
             })}
           </SimpleGrid>

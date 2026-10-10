@@ -1,9 +1,11 @@
-import { Field, Heading, Input, Skeleton, Stack, Text, Textarea } from '@chakra-ui/react'
+import { Field, Heading, Input, Skeleton, Stack, Textarea } from '@chakra-ui/react'
 import { useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { PageWrapper } from '../components/layout/PageWrapper'
-import { GlassCard } from '../components/ui/GlassCard'
-import { GradientButton } from '../components/ui/GradientButton'
+import { Card } from '../components/ui/Card'
+import { ErrorNote } from '../components/ui/ErrorNote'
+import { toastOk } from '../lib/toast'
+import { PrimaryButton } from '../components/ui/PrimaryButton'
 import { usePtoPlan } from '../hooks/usePtoPlans'
 import type { PtoPlan } from '../types'
 import { errorMessage, validatePto } from '../lib/pto'
@@ -53,6 +55,7 @@ function PtoForm({ planId, plan, loadError }: { planId: number | null; plan: Pto
     const input = { ...values, reason: values.reason.trim() || null }
     try {
       const saved = planId === null ? await ptoService.create(input) : await ptoService.update(planId, input)
+      toastOk(planId === null ? 'Leave booked! Time to update your out-of-office 🏝️' : 'Saved. Your escape plan is now even better ✨')
       navigate(`/pto/${saved.id}`)
     } catch (err) {
       setSubmitError(errorMessage(err))
@@ -63,16 +66,12 @@ function PtoForm({ planId, plan, loadError }: { planId: number | null; plan: Pto
   return (
     <PageWrapper>
       <Heading size="2xl" mb="6">
-        {planId === null ? '🧳 Plan PTO' : '✏️ Edit PTO'}
+        {planId === null ? '🧳 Plan your great escape' : '✏️ Tweak your escape'}
       </Heading>
       <form noValidate onSubmit={(e) => void onSubmit(e)}>
-      <GlassCard maxW="xl">
+      <Card maxW="xl">
         <Stack gap="4">
-          {(loadError ?? submitError) && (
-            <Text role="alert" color="red.500">
-              {loadError ?? submitError}
-            </Text>
-          )}
+          {(loadError ?? submitError) && <ErrorNote message={(loadError ?? submitError) as string} />}
           {FIELDS.map((f) => (
             <Field.Root key={f.key} invalid={Boolean(errors[f.key])} required>
               <Field.Label>{f.label}</Field.Label>
@@ -85,14 +84,14 @@ function PtoForm({ planId, plan, loadError }: { planId: number | null; plan: Pto
             </Field.Root>
           ))}
           <Field.Root>
-            <Field.Label>Reason (optional)</Field.Label>
+            <Field.Label>Reason (optional, "touching grass" is valid)</Field.Label>
             <Textarea value={values.reason} onChange={(ev) => setValues({ ...values, reason: ev.target.value })} />
           </Field.Root>
-          <GradientButton type="submit" loading={saving}>
-            {planId === null ? 'Create PTO plan' : 'Save changes'}
-          </GradientButton>
+          <PrimaryButton type="submit" loading={saving}>
+            {planId === null ? 'Book the escape 🏝️' : 'Save changes'}
+          </PrimaryButton>
         </Stack>
-      </GlassCard>
+      </Card>
       </form>
     </PageWrapper>
   )

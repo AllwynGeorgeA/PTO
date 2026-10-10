@@ -9,7 +9,7 @@ export default function LoginPage() {
   if (user) return <Navigate to="/dashboard" replace />
   return (
     <AuthCard
-      title="Welcome back 🏖️"
+      title="Welcome back, escape artist 🏖️"
       subtitle="Log in to check on your out-of-office."
       footer={
         <>

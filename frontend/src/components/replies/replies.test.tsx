@@ -44,12 +44,12 @@ describe('CopyButton', () => {
 })
 
 describe('TonePicker', () => {
-  it('renders 4 tones and reports selection', () => {
+  it('renders 5 tones and reports selection', () => {
     const onChange = vi.fn()
     wrap(<TonePicker value="professional" onChange={onChange} />)
-    expect(screen.getAllByRole('radio')).toHaveLength(4)
+    expect(screen.getAllByRole('radio')).toHaveLength(5)
     expect(screen.getByRole('radio', { name: /Professional/ }).getAttribute('aria-checked')).toBe('true')
-    fireEvent.click(screen.getByRole('radio', { name: /Funny/ }))
+    fireEvent.click(screen.getByRole('radio', { name: /HR may or may not/ }))
     expect(onChange).toHaveBeenCalledWith('funny')
   })
 })

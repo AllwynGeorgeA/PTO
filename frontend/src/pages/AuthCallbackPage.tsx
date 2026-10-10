@@ -30,13 +30,13 @@ export default function AuthCallbackPage() {
     <Center minH="50vh">
       {failed ? (
         <Stack align="center" gap="2" role="alert">
-          <Text>Google sign-in did not work out. 😬</Text>
+          <Text>Google sign-in did not work out. Even Google needed a day off. 😬</Text>
           <Link asChild color="brand.fg">
             <RouterLink to="/login">Back to login</RouterLink>
           </Link>
         </Stack>
       ) : (
-        <Spinner size="xl" color="ocean.500" />
+        <Spinner size="xl" color="brand.solid" />
       )}
     </Center>
   )

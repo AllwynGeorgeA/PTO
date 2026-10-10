@@ -1,7 +1,7 @@
 import { Field, Input, Stack, Text } from '@chakra-ui/react'
 import { useState, type FormEvent } from 'react'
 import { useAuth } from '../../context/AuthContext'
-import { GradientButton } from '../ui/GradientButton'
+import { PrimaryButton } from '../ui/PrimaryButton'
 import { apiErrorMessage, emailError, passwordError } from './validation'
 
 export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
@@ -59,13 +59,13 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
           <Field.ErrorText>{errors.password}</Field.ErrorText>
         </Field.Root>
         {formError && (
-          <Text role="alert" color="red.500" fontSize="sm">
+          <Text role="alert" color="accent.fg" fontSize="sm">
             {formError}
           </Text>
         )}
-        <GradientButton type="submit" loading={loading}>
-          Create account
-        </GradientButton>
+        <PrimaryButton type="submit" loading={loading}>
+          Start my vacation 🌴
+        </PrimaryButton>
       </Stack>
     </form>
   )
