@@ -6,6 +6,8 @@ COPY . .
 # VITE_* vars are baked in at build time
 ARG VITE_API_URL=http://localhost:8000
 ENV VITE_API_URL=$VITE_API_URL
+ARG VITE_DEMO_LOGIN=false
+ENV VITE_DEMO_LOGIN=$VITE_DEMO_LOGIN
 RUN npm run build
 
 FROM nginx:alpine

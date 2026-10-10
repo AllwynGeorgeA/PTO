@@ -1,0 +1,29 @@
+# Production override, used behind an existing Traefik (docker provider, certresolver "letsencrypt").
+#   docker compose -p ptoshield -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# Needs DOMAIN in .env (e.g. DOMAIN=pto.example.com). TLS certificate is issued by Traefik.
+services:
+  backend:
+    # Only reachable through the frontend's nginx, so trusting proxy headers is safe here.
+    command: ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips='*'"]
+    ports: !reset []
+    restart: unless-stopped
+
+  db:
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: https://${DOMAIN:?set DOMAIN in .env}
+        VITE_DEMO_LOGIN: ${VITE_DEMO_LOGIN:-false}
+    # Loopback only, for debugging; Traefik reaches the container directly.
+    ports: !override
+      - "127.0.0.1:8085:80"
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.ptoshield.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.ptoshield.entrypoints=websecure
+      - traefik.http.routers.ptoshield.tls.certresolver=letsencrypt
+      - traefik.http.services.ptoshield.loadbalancer.server.port=80
