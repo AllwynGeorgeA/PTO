@@ -77,6 +77,11 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
             🏝️ Try the demo account
           </Button>
         )}
+        {SHOW_DEMO && (
+          <Text fontSize="sm" color="fg.muted" textAlign="center">
+            Demo login: <b>{DEMO_EMAIL}</b> / <b>{DEMO_PASSWORD}</b>
+          </Text>
+        )}
       </Stack>
     </form>
   )
