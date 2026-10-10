@@ -1,8 +1,13 @@
-import { Field, Input, Stack, Text } from '@chakra-ui/react'
+import { Button, Field, Input, Stack, Text } from '@chakra-ui/react'
 import { useState, type FormEvent } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { GradientButton } from '../ui/GradientButton'
 import { apiErrorMessage, emailError } from './validation'
+
+// Public demo account created by `python -m scripts.seed`. Shown in dev, or when VITE_DEMO_LOGIN=true.
+const DEMO_EMAIL = 'demo@ptoshield.ai'
+const DEMO_PASSWORD = 'DemoPass123!'
+const SHOW_DEMO = import.meta.env.DEV || import.meta.env.VITE_DEMO_LOGIN === 'true'
 
 export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
   const { login } = useAuth()
@@ -21,15 +26,24 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
     setErrors(next)
     setFormError(null)
     if (next.email || next.password) return
+    await attempt(email.trim(), password)
+  }
+
+  const attempt = async (loginEmail: string, loginPassword: string) => {
     setLoading(true)
     try {
-      await login(email.trim(), password)
+      await login(loginEmail, loginPassword)
       onSuccess?.()
     } catch (err) {
       setFormError(apiErrorMessage(err, 'Could not log in. Please try again.'))
     } finally {
       setLoading(false)
     }
+  }
+
+  const demoLogin = () => {
+    setFormError(null)
+    return attempt(DEMO_EMAIL, DEMO_PASSWORD)
   }
 
   return (
@@ -58,6 +72,11 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
         <GradientButton type="submit" loading={loading}>
           Log in
         </GradientButton>
+        {SHOW_DEMO && (
+          <Button type="button" variant="outline" onClick={demoLogin} disabled={loading}>
+            🏝️ Try the demo account
+          </Button>
+        )}
       </Stack>
     </form>
   )
